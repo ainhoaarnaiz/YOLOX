@@ -232,7 +232,8 @@ class COCOEvaluator:
         """
         Enhanced evaluate_prediction with error handling for common issues.
         """
-        
+        # FOCUSED PATCH: Add comprehensive error handling
+        try:
         if not data_dict:
             logger.info("No prediction results. Return empty ap.")
             return (0.0, 0.0, "No predictions found.")

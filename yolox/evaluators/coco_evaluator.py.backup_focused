@@ -1,4 +1,3 @@
-# FOCUSED PATCH APPLIED - Fixes TypeError and evaluation issues
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # Copyright (c) Megvii, Inc. and its affiliates.
@@ -183,14 +182,8 @@ class COCOEvaluator:
             bboxes = output[:, 0:4]
 
             # preprocessing: resize
-            # Handle both tuple and integer img_size
-            if isinstance(self.img_size, (list, tuple)):
-                img_size_val = self.img_size[0]  # Use the first dimension
-            else:
-                img_size_val = self.img_size
-            
             scale = min(
-                img_size_val / float(img_h), img_size_val / float(img_w)
+                self.img_size / float(img_h), self.img_size / float(img_w)
             )
             bboxes /= scale
             cls = output[:, 6]
@@ -229,10 +222,6 @@ class COCOEvaluator:
         COMPLETE FIX: Handle all evaluation issues including invalid predictions,
         missing info fields, and proper return values.
         """
-        """
-        Enhanced evaluate_prediction with error handling for common issues.
-        """
-        
         if not data_dict:
             logger.info("No prediction results. Return empty ap.")
             return (0.0, 0.0, "No predictions found.")
@@ -317,38 +306,7 @@ class COCOEvaluator:
                 json.dump(coco_structure, f)
             
             # Load with COCO API
-            # FOCUSED PATCH: Handle loadRes errors
-            try:
-                # First, read and validate the temp file
-                with open(tmp, 'r') as f:
-                    pred_data = json.load(f)
-                
-                # Add required COCO structure if missing
-                if isinstance(pred_data, list):
-                    # If it's just a list of predictions, wrap in proper COCO structure
-                    coco_structure = {
-                        "info": getattr(cocoGt.dataset, 'info', {
-                            "description": "YOLOX Predictions",
-                            "version": "1.0",
-                            "year": 2025,
-                            "contributor": "YOLOX"
-                        }),
-                        "licenses": getattr(cocoGt.dataset, 'licenses', []),
-                        "images": [],
-                        "annotations": pred_data,
-                        "categories": []
-                    }
-                    
-                    # Write the structured data back
-                    with open(tmp, 'w') as f:
-                        json.dump(coco_structure, f)
-                
-                cocoDt = cocoGt.loadRes(tmp)
-                
-            except Exception as e:
-                logger.error(f"Error in loadRes: {e}")
-                # Return default values to avoid crashing
-                return (0.0, 0.0, f"Evaluation failed: {str(e)}")
+            cocoDt = cocoGt.loadRes(tmp)
             
             # Clean up temp file
             os.unlink(tmp)
