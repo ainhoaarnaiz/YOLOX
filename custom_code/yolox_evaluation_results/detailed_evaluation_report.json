@@ -1,0 +1,81 @@
+{
+  "model_info": {
+    "checkpoint": "C:\\Users\\aarnaizl\\Documents\\YOLOX\\YOLOX_outputs\\yolo_signal_test\\best_ckpt.pth",
+    "config_file": "C:\\Users\\aarnaizl\\Documents\\YOLOX\\exps\\default\\yolox_m.py",
+    "data_directory": "D:\\Ainhoa\\traffic_signs_data\\DFG_detection\\dataset_coco_ready_original_yolox"
+  },
+  "best_metrics": {
+    "optimal_confidence": 0.1,
+    "best_f1_score": 0.001,
+    "precision_at_best_f1": 0.001,
+    "recall_at_best_f1": 0.001,
+    "ap50_95_at_best_f1": 0.001,
+    "ap50_at_best_f1": 0.001
+  },
+  "all_threshold_results": [
+    {
+      "confidence": 0.1,
+      "ap50_95": 0.001,
+      "ap50": 0.001,
+      "precision": 0.001,
+      "recall": 0.001,
+      "f1": 0.001
+    },
+    {
+      "confidence": 0.2,
+      "ap50_95": 0.001,
+      "ap50": 0.001,
+      "precision": 0.001,
+      "recall": 0.001,
+      "f1": 0.001
+    },
+    {
+      "confidence": 0.3,
+      "ap50_95": 0.001,
+      "ap50": 0.001,
+      "precision": 0.001,
+      "recall": 0.001,
+      "f1": 0.001
+    },
+    {
+      "confidence": 0.4,
+      "ap50_95": 0.001,
+      "ap50": 0.001,
+      "precision": 0.001,
+      "recall": 0.001,
+      "f1": 0.001
+    },
+    {
+      "confidence": 0.5,
+      "ap50_95": 0.001,
+      "ap50": 0.001,
+      "precision": 0.001,
+      "recall": 0.001,
+      "f1": 0.001
+    },
+    {
+      "confidence": 0.6,
+      "ap50_95": 0.001,
+      "ap50": 0.001,
+      "precision": 0.001,
+      "recall": 0.001,
+      "f1": 0.001
+    },
+    {
+      "confidence": 0.7,
+      "ap50_95": 0.001,
+      "ap50": 0.001,
+      "precision": 0.001,
+      "recall": 0.001,
+      "f1": 0.001
+    },
+    {
+      "confidence": 0.8,
+      "ap50_95": 0.001,
+      "ap50": 0.001,
+      "precision": 0.001,
+      "recall": 0.001,
+      "f1": 0.001
+    }
+  ]
+}

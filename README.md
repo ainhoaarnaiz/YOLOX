@@ -1,3 +1,14 @@
+## How to Use this YOLOX Version
+Important files:
+-	Scripts in custom_code: example code for training, results evaluation, and detection model usage for video processing.
+-	Scripts in exps/default (yolo_m.py): this files need to be modified in order to change training settings. 
+
+**IMPORTANT**: Please look and modify yoloxm_detection_train.py and yolo_m.py before training as needed.
+
+When training a YOLOX_outputs folder will be created and updated (this is were the weights are saved). You can monitor the training progress:
+-	Looking at the logs in the console
+-	Using tensorboard. In the terminal enter: tensorboard --logdir C:\path\to\YOLOX_outputs\something\tensorboard
+
 <div align="center"><img src="assets/logo.png" width="350"></div>
 <img src="assets/demo.png" >
 

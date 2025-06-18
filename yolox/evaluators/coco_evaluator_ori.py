@@ -1,4 +1,3 @@
-# PATCHED FOR INFO FIELD FIX
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # Copyright (c) Megvii, Inc. and its affiliates.
@@ -254,9 +253,8 @@ class COCOEvaluator:
         return data_list
 
     def evaluate_prediction(self, data_dict, statistics):
-        if not data_dict:
-            logger.info("No prediction results. Return empty ap.")
-            return (0.0, 0.0, ""), []
+        if not is_main_process():
+            return 0, 0, None
 
         logger.info("Evaluate in main process...")
 
@@ -279,80 +277,41 @@ class COCOEvaluator:
             ]
         )
 
-        info = time_info + ""
+        info = time_info + "\n"
 
-        # Concatenate to cocoGt
-        cocoGt = self.dataloader.dataset.coco
-        
-        # PATCHED FOR INFO FIELD FIX - START
-        # Filter out invalid predictions (huge negative or positive values)
-        valid_data_dict = []
-        for pred in data_dict:
-            bbox = pred.get('bbox', [0, 0, 0, 0])
-            # Check for reasonable bounding box values
-            if (len(bbox) == 4 and 
-                -10000 < bbox[0] < 50000 and  # x coordinate
-                -10000 < bbox[1] < 50000 and  # y coordinate  
-                0 < bbox[2] < 50000 and       # width
-                0 < bbox[3] < 50000 and       # height
-                pred.get('score', 0) > 0.001):  # minimum score threshold
-                valid_data_dict.append(pred)
+        # Evaluate the Dt (detection) json comparing with the ground truth
+        if len(data_dict) > 0:
+            cocoGt = self.dataloader.dataset.coco
+            # TODO: since pycocotools can't process dict in py36, write data to json file.
+            if self.testdev:
+                json.dump(data_dict, open("./yolox_testdev_2017.json", "w"))
+                cocoDt = cocoGt.loadRes("./yolox_testdev_2017.json")
             else:
-                logger.warning(f"Filtered invalid prediction: {pred}")
-        
-        if not valid_data_dict:
-            logger.warning("All predictions were invalid. Returning zero AP.")
-            return (0.0, 0.0, "No valid predictions"), []
-        
-        logger.info(f"Using {len(valid_data_dict)} valid predictions out of {len(data_dict)} total")
-        # PATCHED FOR INFO FIELD FIX - END
+                _, tmp = tempfile.mkstemp()
+                json.dump(data_dict, open(tmp, "w"))
+                cocoDt = cocoGt.loadRes(tmp)
+            try:
+                from yolox.layers import COCOeval_opt as COCOeval
+            except ImportError:
+                from pycocotools.cocoeval import COCOeval
 
-        # Write the valid predictions to temp file
-        try:
-            _, tmp = tempfile.mkstemp(suffix=".json")
-            with open(tmp, "w") as f:
-                json.dump(valid_data_dict, f)
+                logger.warning("Use standard COCOeval.")
 
-            # Load predictions and add required COCO fields
-            with open(tmp, "r") as f:
-                pred_data = json.load(f)
-            
-            # Create a proper COCO prediction structure
-            coco_pred_structure = {
-                "info": {
-                    "description": "YOLOX Predictions",
-                    "version": "1.0",
-                    "year": 2025,
-                    "contributor": "YOLOX",
-                    "date_created": "2025-06-10"
-                },
-                "licenses": [],
-                "images": [],
-                "annotations": pred_data,
-                "categories": []
-            }
-            
-            # Write the structured predictions
-            with open(tmp, "w") as f:
-                json.dump(coco_pred_structure, f)
-            
-            cocoDt = cocoGt.loadRes(tmp)
-            
-        except Exception as e:
-            logger.error(f"Error creating prediction file: {e}")
-            return (0.0, 0.0, f"Error: {e}"), []
-
-        try:
             cocoEval = COCOeval(cocoGt, cocoDt, annType[1])
-        except IndexError:
-            logger.error("Malformed box for COCOeval")
-            return (0.0, 0.0, "Malformed box for COCOeval"), []
-
-        cocoEval.evaluate()
-        cocoEval.accumulate()
-        redirect_string = io.StringIO()
-        with contextlib.redirect_stdout(redirect_string):
-            cocoEval.summarize()
-        info += redirect_string.getvalue()
-
-        return self.get_eval_result(cocoEval, time_info), cocoEval.eval["precision"]
+            cocoEval.evaluate()
+            cocoEval.accumulate()
+            redirect_string = io.StringIO()
+            with contextlib.redirect_stdout(redirect_string):
+                cocoEval.summarize()
+            info += redirect_string.getvalue()
+            cat_ids = list(cocoGt.cats.keys())
+            cat_names = [cocoGt.cats[catId]['name'] for catId in sorted(cat_ids)]
+            if self.per_class_AP:
+                AP_table = per_class_AP_table(cocoEval, class_names=cat_names)
+                info += "per class AP:\n" + AP_table + "\n"
+            if self.per_class_AR:
+                AR_table = per_class_AR_table(cocoEval, class_names=cat_names)
+                info += "per class AR:\n" + AR_table + "\n"
+            return cocoEval.stats[0], cocoEval.stats[1], info
+        else:
+            return 0, 0, info

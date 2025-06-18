@@ -1,0 +1,44 @@
+{
+  "model_summary": {
+    "checkpoint_path": "C:\\Users\\aarnaizl\\Documents\\YOLOX\\YOLOX_outputs\\yolo_signal_test\\best_ckpt.pth",
+    "config_file": "C:\\Users\\aarnaizl\\Documents\\YOLOX\\exps\\default\\yolox_m.py",
+    "validation_images": 0,
+    "evaluation_method": "Custom Implementation (COCO evaluator bypassed)"
+  },
+  "optimal_performance": {
+    "best_confidence_threshold": 0.25,
+    "best_f1_score": 0.0,
+    "precision_at_optimal": 0.0,
+    "recall_at_optimal": 0.0,
+    "ap50_at_optimal": 0.0,
+    "true_positives": 0,
+    "false_positives": 4118,
+    "false_negatives": 0
+  },
+  "average_performance": {
+    "mean_precision": 0.0,
+    "mean_recall": 0.0,
+    "mean_f1": 0.0
+  },
+  "detailed_results_by_threshold": [
+    {
+      "confidence": 0.25,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "ap50_95": 0.0,
+      "ap50": 0.0,
+      "true_positives": 0,
+      "false_positives": 4118,
+      "false_negatives": 0,
+      "total_detections": 4118,
+      "total_ground_truths": 0
+    }
+  ],
+  "recommendations": {
+    "deployment_confidence": 0.25,
+    "expected_precision": "0.0%",
+    "expected_recall": "0.0%",
+    "model_quality": "Needs Improvement"
+  }
+}
